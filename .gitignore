@@ -23,3 +23,12 @@ data.json
 
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
