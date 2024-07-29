@@ -55,6 +55,9 @@ export interface IObsidianLinksSettings {
 		copyLinkToBlockToClipboard: boolean;
 		cutLinkToClipboard: boolean;
 	}
+
+	DAV_USERNAME: string;    // New field: DAV username
+	DAV_PASSWORD: string;    // New field: DAV password
 }
 
 export const DEFAULT_SETTINGS: IObsidianLinksSettings = {
@@ -113,5 +116,7 @@ export const DEFAULT_SETTINGS: IObsidianLinksSettings = {
 		copyLinkToHeadingToClipboard: true,
 		copyLinkToBlockToClipboard: false,
 		cutLinkToClipboard: true
-	}
+	},
+	DAV_USERNAME: '',    // New default: empty string
+	DAV_PASSWORD: '',    // New default: empty string
 }

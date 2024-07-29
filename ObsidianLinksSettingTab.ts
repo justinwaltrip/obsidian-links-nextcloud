@@ -807,6 +807,31 @@ export class ObsidianLinksSettingTab extends PluginSettingTab {
                     }));
                 feature1SettingDesc.appendText('.');
             }
+
+            containerEl.createEl('h4', { text: 'Nextcloud DAV Integration' });
+
+            new Setting(containerEl)
+                .setName('DAV Username')
+                .setDesc('Username for Nextcloud DAV')
+                .addText(text => text
+                    .setPlaceholder('Enter your DAV username')
+                    .setValue(this.plugin.settings.DAV_USERNAME)
+                    .onChange(async (value) => {
+                        this.plugin.settings.DAV_USERNAME = value;
+                        await this.plugin.saveSettings();
+                    }));
+
+            new Setting(containerEl)
+                .setName('DAV Password')
+                .setDesc('Password for Nextcloud DAV')
+                .addText(text => text
+                    .setPlaceholder('Enter your DAV password')
+                    .setValue(this.plugin.settings.DAV_PASSWORD)
+                    .onChange(async (value) => {
+                        this.plugin.settings.DAV_PASSWORD = value;
+                        await this.plugin.saveSettings();
+                    }));
+
         }
     }
 }

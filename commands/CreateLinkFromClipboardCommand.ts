@@ -144,7 +144,9 @@ export class CreateLinkFromClipboardCommand extends CommandBase {
 				return;
 			}
 
-			const filePath = await getFilePath(fileId);
+			const { DAV_USERNAME, DAV_PASSWORD } = this.obsidianProxy.settings;
+
+			const filePath = await getFilePath(fileId, DAV_USERNAME, DAV_PASSWORD);
 
 			if (!filePath) {
 				console.error('File path not found');
