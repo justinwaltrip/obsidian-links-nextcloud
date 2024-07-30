@@ -3,16 +3,11 @@ import { CommandBase, Func } from "./ICommand";
 import { LinkTypes, findLink, findLinks, getFileName, getPageTitle, getSafeFilename } from "../utils";
 import { IObsidianProxy } from "./IObsidianProxy";
 import { selectWordUnderCursor } from "../editorUtils";
-import axios from 'axios';
-import { XMLParser } from 'fast-xml-parser';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
 
 async function getFilePath(
 	fileId,
-	username = process.env.DAV_USERNAME || '',
-	password = process.env.DAV_PASSWORD || '',
+	username,
+	password,
 	url = 'https://nixos.tailc910f.ts.net/remote.php/dav/'
 ) {
 	console.log(`getFilePath called with fileId: ${fileId}`);
@@ -43,18 +38,21 @@ async function getFilePath(
     </d:basicsearch>
 </d:searchrequest>`;
 
-	const headers = { 'Content-Type': 'text/xml' };
+	// const headers = { 'Content-Type': 'text/xml' };
+	const auth = `${username}:${password}`;
+	const base64 = btoa(auth);
+	const headers = {
+		'Content-Type': 'text/xml',
+		Authorization: `Basic ${base64}`,
+	};
 
 	try {
-		const response = await axios({
+		const response = await fetch(url, {
 			method: 'SEARCH',
-			url,
-			data,
-			headers,
-			auth: {
-				username,
-				password,
-			},
+			headers: new Headers(headers),
+			body: data,
+			credentials: 'include',
+			// auth: `${username}:${password}`,
 		});
 
 		console.log(`Response status: ${response.status}`);
@@ -63,10 +61,21 @@ async function getFilePath(
 			return null;
 		}
 
-		const parser = new XMLParser();
-		const parsedData = parser.parse(response.data);
-		console.log('Parsed response data:', parsedData);
-		const href = parsedData['d:multistatus']?.['d:response']?.['d:href'];
+		const responseText = await response.text();
+		const parser = new DOMParser();
+		const xmlDoc = parser.parseFromString(responseText, "application/xml");
+
+		// Debugging: Check the parsed XMLDocument structure
+		console.log('Parsed response data:', xmlDoc);
+
+		// Querying elements with a specific namespace (e.g., 'd' namespace)
+		// const namespace = 'd';
+		const hrefElement = xmlDoc.getElementsByTagNameNS('*', 'href')[0];
+
+		const href = hrefElement?.textContent;
+
+		console.log('Parsed href:', href);
+
 
 		if (href) {
 			const fullPath = href as string;
