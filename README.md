@@ -1,5 +1,8 @@
-# Obsidian Links <!-- omit in toc -->
+# Convert Nextcloud Universal to iOS Link
 
+Fork of [Obsidian Links](https://github.com/mii-key/obsidian-links) plugin which overrides the `Create link from clipboard` command to convert a Nextcloud Universal link to an iOS link. See the original plugin's README below for more information.
+
+# Obsidian Links <!-- omit in toc -->
 
 Manipulate links in [Obsidian](https://obsidian.md).
 
