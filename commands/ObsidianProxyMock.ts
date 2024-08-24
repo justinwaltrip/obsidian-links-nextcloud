@@ -147,7 +147,11 @@ export class ObsidianProxyMock {
             copyLinkToHeadingToClipboard: true,
             copyLinkToBlockToClipboard: true,
             cutLinkToClipboard: true
-        }
+        },
+
+        DAV_USERNAME: '',    // New default: empty string
+        DAV_PASSWORD: '',    // New default: empty string
+        NEXTCLOUD_URL: ''
     }
 
     constructor(vault?: IVault, uiFactory?: IUiFactory) {

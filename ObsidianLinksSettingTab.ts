@@ -832,6 +832,17 @@ export class ObsidianLinksSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }));
 
+            new Setting(containerEl)
+                .setName('Nextcloud URL')
+                .setDesc('URL to your Nextcloud instance')
+                .addText(text => text
+                    .setPlaceholder('Enter your Nextcloud URL')
+                    .setValue(this.plugin.settings.NEXTCLOUD_URL)
+                    .onChange(async (value) => {
+                        this.plugin.settings.NEXTCLOUD_URL = value;
+                        await this.plugin.saveSettings();
+                    }));
+
         }
     }
 }

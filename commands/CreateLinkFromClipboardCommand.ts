@@ -5,14 +5,14 @@ import { IObsidianProxy } from "./IObsidianProxy";
 import { selectWordUnderCursor } from "../editorUtils";
 
 async function getFilePath(
-	fileId,
-	username,
-	password,
-	url = 'https://nixos.tailc910f.ts.net/remote.php/dav/'
+    fileId: string,
+    username: string,
+    password: string,
+    url: string,
 ) {
-	console.log(`getFilePath called with fileId: ${fileId}`);
+    console.log(`getFilePath called with fileId: ${fileId}`);
 
-	const data = `<?xml version="1.0" encoding="UTF-8"?>
+    const data = `<?xml version="1.0" encoding="UTF-8"?>
 <d:searchrequest xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns">
     <d:basicsearch>
         <d:select>
@@ -22,7 +22,7 @@ async function getFilePath(
         </d:select>
         <d:from>
             <d:scope>
-                <d:href>/files/admin</d:href>
+                <d:href>/files/${username}</d:href>
                 <d:depth>infinity</d:depth>
             </d:scope>
         </d:from>
@@ -38,172 +38,172 @@ async function getFilePath(
     </d:basicsearch>
 </d:searchrequest>`;
 
-	// const headers = { 'Content-Type': 'text/xml' };
-	const auth = `${username}:${password}`;
-	const base64 = btoa(auth);
-	const headers = {
-		'Content-Type': 'text/xml',
-		Authorization: `Basic ${base64}`,
-	};
+    // const headers = { 'Content-Type': 'text/xml' };
+    const auth = `${username}:${password}`;
+    const base64 = btoa(auth);
+    const headers = {
+        'Content-Type': 'text/xml',
+        Authorization: `Basic ${base64}`,
+    };
 
-	try {
-		const response = await fetch(url, {
-			method: 'SEARCH',
-			headers: new Headers(headers),
-			body: data,
-			credentials: 'include',
-			// auth: `${username}:${password}`,
-		});
+    try {
+        const response = await fetch(url, {
+            method: 'SEARCH',
+            headers: new Headers(headers),
+            body: data,
+            credentials: 'include',
+            // auth: `${username}:${password}`,
+        });
 
-		console.log(`Response status: ${response.status}`);
-		if (response.status !== 207) {
-			console.error('Unexpected response status:', response.status);
-			return null;
-		}
+        console.log(`Response status: ${response.status}`);
+        if (response.status !== 207) {
+            console.error('Unexpected response status:', response.status);
+            return null;
+        }
 
-		const responseText = await response.text();
-		const parser = new DOMParser();
-		const xmlDoc = parser.parseFromString(responseText, "application/xml");
+        const responseText = await response.text();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(responseText, "application/xml");
 
-		// Debugging: Check the parsed XMLDocument structure
-		console.log('Parsed response data:', xmlDoc);
+        // Debugging: Check the parsed XMLDocument structure
+        console.log('Parsed response data:', xmlDoc);
 
-		// Querying elements with a specific namespace (e.g., 'd' namespace)
-		// const namespace = 'd';
-		const hrefElement = xmlDoc.getElementsByTagNameNS('*', 'href')[0];
+        // Querying elements with a specific namespace (e.g., 'd' namespace)
+        // const namespace = 'd';
+        const hrefElement = xmlDoc.getElementsByTagNameNS('*', 'href')[0];
 
-		const href = hrefElement?.textContent;
+        const href = hrefElement?.textContent;
 
-		console.log('Parsed href:', href);
+        console.log('Parsed href:', href);
 
 
-		if (href) {
-			const fullPath = href as string;
-			if (fullPath.includes('/files/admin/')) {
-				const filePath = fullPath.split('/files/admin/')[1];
-				console.log(`File path found: ${filePath}`);
-				return filePath;
-			}
-		} else {
-			console.error('Href not found in response');
-		}
+        if (href) {
+            const fullPath = href as string;
+            if (fullPath.includes('/files/admin/')) {
+                const filePath = fullPath.split('/files/admin/')[1];
+                console.log(`File path found: ${filePath}`);
+                return filePath;
+            }
+        } else {
+            console.error('Href not found in response');
+        }
 
-		return null;
-	} catch (error) {
-		console.error('Error in getFilePath:', error);
-		return null;
-	}
+        return null;
+    } catch (error) {
+        console.error('Error in getFilePath:', error);
+        return null;
+    }
 }
 
 export class CreateLinkFromClipboardCommand extends CommandBase {
-	obsidianProxy: IObsidianProxy;
-	callback: ((error: Error | null, data: any) => void) | undefined
+    obsidianProxy: IObsidianProxy;
+    callback: ((error: Error | null, data: any) => void) | undefined
 
-	constructor(obsidianProxy: IObsidianProxy,
-		isPresentInContextMenu: Func<boolean> = () => true, isEnabled: Func<boolean> = () => true,
-		callback: ((error: Error | null, data: any) => void) | undefined = undefined) {
-		super(isPresentInContextMenu, isEnabled);
-		this.id = 'editor-create-link-from-clipboard';
-		this.displayNameCommand = 'Create link from clipboard';
-		this.displayNameContextMenu = 'Create link from clipboard';
-		this.icon = 'link';
-		this.obsidianProxy = obsidianProxy;
-		this.callback = callback;
-	}
+    constructor(obsidianProxy: IObsidianProxy,
+        isPresentInContextMenu: Func<boolean> = () => true, isEnabled: Func<boolean> = () => true,
+        callback: ((error: Error | null, data: any) => void) | undefined = undefined) {
+        super(isPresentInContextMenu, isEnabled);
+        this.id = 'editor-create-link-from-clipboard';
+        this.displayNameCommand = 'Create link from clipboard';
+        this.displayNameContextMenu = 'Create link from clipboard';
+        this.icon = 'link';
+        this.obsidianProxy = obsidianProxy;
+        this.callback = callback;
+    }
 
-	handler(editor: Editor, checking: boolean): boolean | void {
-		console.log('Handler invoked with checking:', checking);
+    handler(editor: Editor, checking: boolean): boolean | void {
+        console.log('Handler invoked with checking:', checking);
 
-		if (checking && !this.isEnabled()) {
-			console.log('Command is not enabled');
-			return false;
-		}
+        if (checking && !this.isEnabled()) {
+            console.log('Command is not enabled');
+            return false;
+        }
 
-		if (checking) {
-			const noteText = editor.getValue();
-			const cursorOffset = editor.posToOffset(editor.getCursor('from'));
-			const link = findLink(noteText, cursorOffset, cursorOffset, LinkTypes.All);
-			if (link && link.position.start < cursorOffset && link.position.end > cursorOffset) {
-				console.log('Link is already at the cursor position');
-				return false;
-			}
-			return true;
-		}
+        if (checking) {
+            const noteText = editor.getValue();
+            const cursorOffset = editor.posToOffset(editor.getCursor('from'));
+            const link = findLink(noteText, cursorOffset, cursorOffset, LinkTypes.All);
+            if (link && link.position.start < cursorOffset && link.position.end > cursorOffset) {
+                console.log('Link is already at the cursor position');
+                return false;
+            }
+            return true;
+        }
 
-		(async () => {
-			console.log('Async handler invoked');
+        (async () => {
+            console.log('Async handler invoked');
 
-			const httpUrlRegEx = /^(http|https):\/\/[^ "]+$/i;
+            const httpUrlRegEx = /^(http|https):\/\/[^ "]+$/i;
 
-			const clipboardText = await this.obsidianProxy.clipboardReadText();
-			console.log('Clipboard text:', clipboardText);
-			let linkDestination = clipboardText;
+            const clipboardText = await this.obsidianProxy.clipboardReadText();
+            console.log('Clipboard text:', clipboardText);
+            let linkDestination = clipboardText;
 
-			if (!httpUrlRegEx.test(linkDestination)) {
-				console.error('Invalid URL format');
-				return;
-			}
+            if (!httpUrlRegEx.test(linkDestination)) {
+                console.error('Invalid URL format');
+                return;
+            }
 
-			const url = new URL(linkDestination);
-			const pathSegments = url.pathname.split('/');
-			const fileId = pathSegments[pathSegments.length - 1];
+            const url = new URL(linkDestination);
+            const pathSegments = url.pathname.split('/');
+            const fileId = pathSegments[pathSegments.length - 1];
 
-			if (!fileId) {
-				console.error('Invalid URL format');
-				return;
-			}
+            if (!fileId) {
+                console.error('Invalid URL format');
+                return;
+            }
 
-			const { DAV_USERNAME, DAV_PASSWORD } = this.obsidianProxy.settings;
+            const { DAV_USERNAME, DAV_PASSWORD, NEXTCLOUD_URL } = this.obsidianProxy.settings;
 
-			const filePath = await getFilePath(fileId, DAV_USERNAME, DAV_PASSWORD);
+            const filePath = await getFilePath(fileId, DAV_USERNAME, DAV_PASSWORD, NEXTCLOUD_URL);
 
-			if (!filePath) {
-				console.error('File path not found');
-				return;
-			}
+            if (!filePath) {
+                console.error('File path not found');
+                return;
+            }
 
-			const username = 'admin';
-			const newLink = `nextcloud://open-file?user=${username}&link=${url.origin}&path=${filePath}`;
-			console.log('New link:', newLink);
+            const username = 'admin';
+            const newLink = `nextcloud://open-file?user=${username}&link=${url.origin}&path=${filePath}`;
+            console.log('New link:', newLink);
 
-			let selection = editor.getSelection();
-			console.log('Selection:', selection);
+            let selection = editor.getSelection();
+            console.log('Selection:', selection);
 
-			if (!selection && this.obsidianProxy.settings.autoselectWordOnCreateLink) {
-				selection = selectWordUnderCursor(editor);
-				console.log('Auto-selected word:', selection);
-			}
+            if (!selection && this.obsidianProxy.settings.autoselectWordOnCreateLink) {
+                selection = selectWordUnderCursor(editor);
+                console.log('Auto-selected word:', selection);
+            }
 
-			let posRangeStart = editor.getCursor();
-			let posRangeEnd = posRangeStart;
-			if (selection.length > 0) {
-				posRangeStart = editor.getCursor('from');
-				posRangeEnd = editor.getCursor('to');
-				linkDestination = selection;
-			}
+            let posRangeStart = editor.getCursor();
+            let posRangeEnd = posRangeStart;
+            if (selection.length > 0) {
+                posRangeStart = editor.getCursor('from');
+                posRangeEnd = editor.getCursor('to');
+                linkDestination = selection;
+            }
 
-			const requireAngleBrackets = newLink.indexOf(' ') > 0;
-			const linkRawText = requireAngleBrackets ? `[${linkDestination}](<${newLink}>)` : `[${linkDestination}](${newLink})`;
-			console.log('Link raw text:', linkRawText);
+            const requireAngleBrackets = newLink.indexOf(' ') > 0;
+            const linkRawText = requireAngleBrackets ? `[${linkDestination}](<${newLink}>)` : `[${linkDestination}](${newLink})`;
+            console.log('Link raw text:', linkRawText);
 
-			const endOffset = editor.posToOffset(posRangeStart) + linkRawText.length;
-			editor.replaceRange(linkRawText, posRangeStart, posRangeEnd);
-			if (linkDestination) {
-				editor.setCursor(editor.offsetToPos(endOffset));
-			} else {
-				editor.setCursor(editor.offsetToPos(editor.posToOffset(posRangeStart) + 1));
-			}
-			this.callback?.(null, undefined);
-		})();
-	}
+            const endOffset = editor.posToOffset(posRangeStart) + linkRawText.length;
+            editor.replaceRange(linkRawText, posRangeStart, posRangeEnd);
+            if (linkDestination) {
+                editor.setCursor(editor.offsetToPos(endOffset));
+            } else {
+                editor.setCursor(editor.offsetToPos(editor.posToOffset(posRangeStart) + 1));
+            }
+            this.callback?.(null, undefined);
+        })();
+    }
 
-	async getPageText(url: URL): Promise<string> {
-		console.log('getPageText called with URL:', url);
-		const response = await this.obsidianProxy.requestUrl({ url: url.toString() });
-		console.log('Response status:', response.status);
-		if (response.status !== 200) {
-			throw new Error(`Failed to request '${url}': ${response.status}`);
-		}
-		return response.text;
-	}
+    async getPageText(url: URL): Promise<string> {
+        console.log('getPageText called with URL:', url);
+        const response = await this.obsidianProxy.requestUrl({ url: url.toString() });
+        console.log('Response status:', response.status);
+        if (response.status !== 200) {
+            throw new Error(`Failed to request '${url}': ${response.status}`);
+        }
+        return response.text;
+    }
 }
