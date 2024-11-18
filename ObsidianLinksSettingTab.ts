@@ -833,8 +833,8 @@ export class ObsidianLinksSettingTab extends PluginSettingTab {
                     }));
 
             new Setting(containerEl)
-                .setName('Nextcloud URL')
-                .setDesc('URL to your Nextcloud instance')
+                .setName('Nextcloud WebDAV URL')
+                .setDesc('WebDAV URL to your Nextcloud instance (ex. https://cloud.example.com/remote.php/dav/)')
                 .addText(text => text
                     .setPlaceholder('Enter your Nextcloud URL')
                     .setValue(this.plugin.settings.NEXTCLOUD_URL)

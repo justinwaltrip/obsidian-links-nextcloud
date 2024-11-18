@@ -38,7 +38,6 @@ async function getFilePath(
     </d:basicsearch>
 </d:searchrequest>`;
 
-    // const headers = { 'Content-Type': 'text/xml' };
     const auth = `${username}:${password}`;
     const base64 = btoa(auth);
     const headers = {
@@ -52,7 +51,6 @@ async function getFilePath(
             headers: new Headers(headers),
             body: data,
             credentials: 'include',
-            // auth: `${username}:${password}`,
         });
 
         console.log(`Response status: ${response.status}`);
@@ -65,22 +63,17 @@ async function getFilePath(
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(responseText, "application/xml");
 
-        // Debugging: Check the parsed XMLDocument structure
         console.log('Parsed response data:', xmlDoc);
 
-        // Querying elements with a specific namespace (e.g., 'd' namespace)
-        // const namespace = 'd';
         const hrefElement = xmlDoc.getElementsByTagNameNS('*', 'href')[0];
-
         const href = hrefElement?.textContent;
-
         console.log('Parsed href:', href);
-
 
         if (href) {
             const fullPath = href as string;
-            if (fullPath.includes('/files/admin/')) {
-                const filePath = fullPath.split('/files/admin/')[1];
+            const userPath = `/files/${username}/`;
+            if (fullPath.includes(userPath)) {
+                const filePath = fullPath.split(userPath)[1];
                 console.log(`File path found: ${filePath}`);
                 return filePath;
             }
@@ -162,8 +155,7 @@ export class CreateLinkFromClipboardCommand extends CommandBase {
                 return;
             }
 
-            const username = 'admin';
-            const newLink = `nextcloud://open-file?user=${username}&link=${url.origin}&path=${filePath}`;
+            const newLink = `nextcloud://open-file?user=${DAV_USERNAME}&link=${url.origin}&path=${filePath}`;
             console.log('New link:', newLink);
 
             let selection = editor.getSelection();
