@@ -130,7 +130,7 @@ export class CreateLinkFromClipboardCommand extends CommandBase {
 
             const clipboardText = await this.obsidianProxy.clipboardReadText();
             console.log('Clipboard text:', clipboardText);
-            let linkDestination = clipboardText;
+            const linkDestination = clipboardText;
 
             if (!httpUrlRegEx.test(linkDestination)) {
                 console.error('Invalid URL format');
@@ -155,6 +155,13 @@ export class CreateLinkFromClipboardCommand extends CommandBase {
                 return;
             }
 
+            // Extract the file name from the file path
+            const fileName = filePath.split('/').pop();
+            if (!fileName) {
+                console.error('File name not found in path');
+                return;
+            }
+
             const newLink = `nextcloud://open-file?user=${DAV_USERNAME}&link=${url.origin}&path=${filePath}`;
             console.log('New link:', newLink);
 
@@ -171,16 +178,15 @@ export class CreateLinkFromClipboardCommand extends CommandBase {
             if (selection.length > 0) {
                 posRangeStart = editor.getCursor('from');
                 posRangeEnd = editor.getCursor('to');
-                linkDestination = selection;
             }
 
             const requireAngleBrackets = newLink.indexOf(' ') > 0;
-            const linkRawText = requireAngleBrackets ? `[${linkDestination}](<${newLink}>)` : `[${linkDestination}](${newLink})`;
+            const linkRawText = requireAngleBrackets ? `[${fileName}](<${newLink}>)` : `[${fileName}](${newLink})`;
             console.log('Link raw text:', linkRawText);
 
             const endOffset = editor.posToOffset(posRangeStart) + linkRawText.length;
             editor.replaceRange(linkRawText, posRangeStart, posRangeEnd);
-            if (linkDestination) {
+            if (fileName) {
                 editor.setCursor(editor.offsetToPos(endOffset));
             } else {
                 editor.setCursor(editor.offsetToPos(editor.posToOffset(posRangeStart) + 1));
